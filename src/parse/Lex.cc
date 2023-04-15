@@ -54,7 +54,7 @@ auto Lex::scan_token() -> Token* {
 				str.push_back(peek(1));
 				advance();
 			}
-			return new Token(str, Kind::REGISTER, Pos(target, start, line, column, idx));
+			return new Token(str, Kind::DATA, Pos(target, start, line, column, idx));
 		}
 		default: {
 		}
