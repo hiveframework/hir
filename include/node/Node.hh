@@ -6,10 +6,13 @@
 #pragma once
 
 #include <node/NodeKind.hh>
+#include <token/Token.hh>
+
+namespace hive::ir {
 
 class Node;
 
-class RegisterNode;
+class VirtualRegisterNode;
 class DataRegisterNode;
 class LiteralNode;
 
@@ -39,3 +42,43 @@ class DebugNode;
 class DataStaticNode;
 class DataStructNode;
 class TypeNode;
+
+class Node {
+
+
+	public:
+		using Kind = NodeKinds;
+		Node(Kind kind) {
+			this->kind = kind;
+		}
+
+		auto get_node_kind() -> Kind {return kind;}
+		auto get_node_name() -> std::string {return name_from_node(kind);}
+
+	private:
+		Kind kind;
+};
+
+class VirtualRegisterNode : Node {
+	public:
+		Token* ident;
+		size number;
+
+		VirtualRegisterNode(Token* ident, size number) : Node(Kind::VIRTUAL_REGISTER_NODE) {
+			this->ident  = ident;
+			this->number = number;
+		}
+};
+
+class DataRegisterNode : Node {
+	public:
+		Token* ident;
+		size number;
+
+		DataRegisterNode(Token* ident, size number) : Node(Kind::VIRTUAL_REGISTER_NODE) {
+			this->ident  = ident;
+			this->number = number;
+		}
+};
+
+}

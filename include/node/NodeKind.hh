@@ -6,9 +6,14 @@
 
 #pragma once
 
+
 #include <Defs.hh>
+#include <map>
+
+namespace hive::ir {
 
 #define NODE_KIND_NAME_LIST \
+	_Node(INVALID, "INVALID") \
 	_Node(ADD_NODE, "ADD_NODE") \
 	_Node(SUB_NODE, "SUB_NODE") \
 	_Node(DIV_NODE, "DIV_NODE") \
@@ -18,7 +23,6 @@
 	_Node(XOR_NODE, "XOR_NODE") \
 	_Node(NOT_NODE, "NOT_NODE") \
 	_Node(LABEL_NODE, "LABEL_NODE") \
-	_Node(COMPARE_EQUALITY_NODE, "COMPARE_EQUALITY_NODE") \
 	_Node(COMPARE_EQUALITY_NODE, "COMPARE_EQUALITY_NODE") \
 	_Node(COMPARE_LESS_THAN_NODE, "COMPARE_LESS_THAN_NODE") \
 	_Node(COMPARE_GREATER_THAN_NODE, "COMPARE_GREATER_THAN_NODE") \
@@ -45,3 +49,22 @@
 	_Node(I16_TYPE_NODE, "I16_TYPE_NODE") \
 	_Node(I32_TYPE_NODE, "I32_TYPE_NODE") \
 	_Node(I64_TYPE_NODE, "I64_TYPE_NODE") \
+	_Node(VIRTUAL_REGISTER_NODE, "VIRTUAL_REGISTER_NODE") \
+	_Node(DATA_REGISTER_NODE, "REGISTER_NODE") \
+
+}
+
+enum class NodeKinds : u8 {
+	#define _Node(kind, name) kind,
+		NODE_KIND_NAME_LIST
+	#undef _Node
+};
+
+const std::map<NodeKinds, std::string> node_name_map =  {
+	#define _Node(kind, name) {NodeKinds::kind, name},
+		NODE_KIND_NAME_LIST
+	#undef _Node
+};
+
+auto name_from_node(NodeKinds kind) -> std::string;
+auto node_from_name(std::string name) -> NodeKinds;

@@ -11,12 +11,14 @@ add_subdirectory(vendor/fmt)
 include_directories(include)
 
 set(HIR_SRC
-  src/Main.cc
+	src/Main.cc
 
-  src/parse/Lex.cc
+	src/parse/Lex.cc
 
-  src/token/Token.cc
-  src/token/TokenKind.cc
+	src/token/Token.cc
+	src/token/TokenKind.cc
+
+	src/node/NodeKind.cc
 )
 
 add_definitions( -DDEBUG=1)
