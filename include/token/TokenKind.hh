@@ -21,15 +21,17 @@ namespace hive::ir {
 	Tok(EOL, "EOL") \
 	Tok(COMMENT, "COMMENT") \
 	Tok(_EOF, "EOF") \
-	Tok(RIGHT_ARROW, "->") \
-	Tok(DASH, "-") \
-	Tok(COLON, ":") \
-	Tok(POUND, "#") \
-	Tok(PIPE, "|") \
+	Tok(RIGHT_ARROW, "RIGHT_ARROW") \
+	Tok(DASH, "DASH") \
+	Tok(COLON, "COLON") \
+	Tok(DOT, "DOT") \
+	Tok(POUND, "POUND") \
+	Tok(PIPE, "PIPE") \
+	Tok(DOUBLE_QUOTE, "DOUBLE_QUOTE") \
 \
 	Tok(REISTER_START, "") \
-		Tok(REGISTER, "r") \
-		Tok(DATA, "d") \
+		Tok(REGISTER, "REGISTER") \
+		Tok(DATA, "DATA_REGISTER") \
 	Tok(REISTER_END, "") \
 \
 	Tok(SCOPE_START, "") \
@@ -44,9 +46,10 @@ namespace hive::ir {
 	Tok(LITERAL_START, "") \
 		Tok(IDENT_LITERAL, "IDENT_LITERAL") \
 		Tok(STRING_LITERAL, "STRING_LITERAL") \
+		Tok(HEX_LITERAL, "HEX_LITERAL") \
 		Tok(DIGIT_LITERAL, "DIGIT_LITERAL") \
 		Tok(FLOAT_LITERAL, "FLOAT_LITERAL") \
-		Tok(OCAL_LITERAL, "OCAL_LITERAL") \
+		Tok(OCTAL_LITERAL, "OCTAL_LITERAL") \
 		Tok(BINARY_LITERAL, "BINARY_LITERAL") \
 	Tok(LITERAL_END, "") \
 \
@@ -73,7 +76,7 @@ namespace hive::ir {
 		Tok(CALL, "CALL") \
 		Tok(STORE, "STORE") \
 		Tok(WRITE, "WRITE") \
-		Tok(_DEBUG, "DATA") \
+		Tok(_DEBUG, "DEBUG") \
 		Tok(STATIC, "STATIC") \
 		Tok(STRUCT, "STRUCT") \
 	Tok(INSTRUCTION_END, "") \

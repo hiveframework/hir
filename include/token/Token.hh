@@ -18,6 +18,8 @@ struct Pos {
 	size len;
 
 	Pos(std::string path, size offset_start, size line, size column, size offset_end);
+
+	auto to_string() -> std::string;
 };
 
 class Token {
@@ -32,6 +34,8 @@ class Token {
 		std::string name;
 		Kind kind;
 		Pos pos;
+
+		auto to_string() -> std::string;
 };
 
 }

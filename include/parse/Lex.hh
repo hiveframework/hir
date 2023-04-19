@@ -21,7 +21,7 @@ class Lex {
 	using Kind = TokenKind;
 
 	public:
-		std::vector<Token*> token;
+		std::vector<Token*> tokens;
 
 		Lex(const char* target, LexMode mode);
 	private:
@@ -43,9 +43,13 @@ class Lex {
 		auto scan_token() -> Token*;
 
 	private:
+		auto concat_string() -> std::string;
+
+		auto concat_number() -> Token*;
+		auto concat_ident() -> Token*;
+
 		auto is_hex() -> bool;
 		auto is_digit() -> bool;
-		auto is_digit(i8 n) -> bool;
 		auto is_octal() -> bool;
 		auto is_binary() -> bool;
 
@@ -53,6 +57,8 @@ class Lex {
 		auto is_alpha_num() -> bool;
 		auto is_ident() -> bool;
 
+		auto lex_error(std::string msg) -> void;
+		auto load_target(const char* f) -> void;
 };
 
 }

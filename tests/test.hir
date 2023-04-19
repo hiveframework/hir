@@ -1,0 +1,11 @@
+#version "0.0.1"
+
+#target osx_arm64 | osx_x64 | linux_arm64 | linux_x64 | windows_x64
+#syslink libc
+
+#entry main
+
+LABEL main:
+	d0 STATIC "Hello, World!\n"
+	CALL libc.printf d0
+	RETURN 0

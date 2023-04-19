@@ -5,6 +5,7 @@
  */
 
 #include <token/Token.hh>
+#include <fmt/core.h>
 
 namespace hive::ir {
 
@@ -17,10 +18,18 @@ Pos::Pos(std::string path, size offset_start, size line, size column, size offse
 	this->len = this->offset_end - this->offset_start;
 }
 
+auto Pos::to_string() -> std::string {
+	return fmt::format("Pos{{path={}, offset_start={}, line={}, column={}, offset_end={}, len={}}}", path, offset_start, line, column, offset_end, len);
+}
+
 Token::Token(std::string name, Kind kind, Pos pos) : name(name), kind(kind), pos(pos) {}
 
 Token::Token(std::string name, Pos pos): name(name), kind(kind_from_name(name)), pos(pos) {}
 
 Token::Token(Kind kind, Pos pos) : kind(kind), name(name_from_kind(kind)), pos(pos) {}
+
+auto Token::to_string() -> std::string {
+	return fmt::format("Token{{name={}, kind={}, {}}}", name, name_from_kind(kind), pos.to_string());
+}
 
 }
