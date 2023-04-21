@@ -35,6 +35,9 @@ class Token {
 		Kind kind;
 		Pos pos;
 
+		auto is_literal() -> bool;
+		auto is_type() -> bool;
+
 		auto to_string() -> std::string;
 };
 

@@ -28,6 +28,9 @@ Token::Token(std::string name, Pos pos): name(name), kind(kind_from_name(name)),
 
 Token::Token(Kind kind, Pos pos) : kind(kind), name(name_from_kind(kind)), pos(pos) {}
 
+auto Token::is_literal() -> bool { return (Kind::LITERAL_START < kind && kind < Kind::LITERAL_END); }
+auto Token::is_type() -> bool { return (Kind::TYPE_START < kind && kind < Kind::TYPE_END); }
+
 auto Token::to_string() -> std::string {
 	return fmt::format("Token{{name={}, kind={}, {}}}", name, name_from_kind(kind), pos.to_string());
 }

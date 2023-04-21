@@ -19,6 +19,7 @@ set(HIR_SRC
 	src/token/TokenKind.cc
 
 	src/node/NodeKind.cc
+	src/parse/Parse.cc
 )
 
 add_definitions( -DDEBUG=1)
