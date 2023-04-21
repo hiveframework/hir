@@ -21,6 +21,24 @@ auto Parse::init_parse() -> Node* {
 	return nullptr;
 };
 
+
+auto Parse::lable() -> Node* {
+	auto ident = consume(Kind::LABEL);
+	consume(Kind::SPACE);
+	auto name = literal();
+	consume(Kind::COLON);
+	consume(Kind::EOL);
+
+	std::vector<Node*> lables;
+	while(!check(Kind::TAB)) {
+		consume(Kind::TAB);
+		auto inst = instruction();
+		consume(Kind::EOL);
+	}
+
+	return new LabelNode(ident, name, lables);
+}
+
 auto Parse::instruction() -> Node* {
 	switch(peek()->kind) {
 		case Kind::ADD: not_impl("ADD");
@@ -49,20 +67,6 @@ auto Parse::instruction() -> Node* {
 		default:
 			parse_error(fmt::format("Illegal token found {}", peek()->to_string()));
 	}
-	return nullptr;
-}
-
-auto Parse::type() -> Node* {
-	auto ident = peek();
-	if (!ident->is_type()) parse_error(fmt::format("Token is not type {}", ident->to_string()));
-	advance();
-
-	if (ident->kind == Kind::I8) return new TypeNode(ident, NodeKinds::I8_TYPE_NODE);
-	if (ident->kind == Kind::I16) return new TypeNode(ident, NodeKinds::I16_TYPE_NODE);
-	if (ident->kind == Kind::I32) return new TypeNode(ident, NodeKinds::I32_TYPE_NODE);
-	if (ident->kind == Kind::I64) return new TypeNode(ident, NodeKinds::I64_TYPE_NODE);
-
-	parse_error(fmt::format("Impossible token error for looking for type got {} instead.", ident->to_string()));
 	return nullptr;
 }
 
@@ -99,7 +103,6 @@ auto Parse::literal() -> Node* {
 		return new BinaryLiteralNode(ident);
 	}
 
-
 	parse_error(fmt::format("Unable to lex literal got {} instead!", peek()->to_string()));
 	return nullptr;
 }
@@ -118,6 +121,16 @@ auto Parse::directive() -> Node* {
 
 }
 
+auto Parse::reg() -> Node* {
+	if (!peek()->is_register()) parse_error(fmt::format("Expexted a register got {} instead", peek()->to_string()));
+
+	if (check(Kind::REGISTER)) return v_register();
+	if (check(Kind::DATA)) return d_register();
+
+	parse_error(fmt::format("Impossed parse for register for token {}.", peek()->to_string()));
+	return nullptr;
+}
+
 auto Parse::v_register() -> Node* {
 	auto reg = consume(Kind::REGISTER);
 	auto str = reg->name;
@@ -134,6 +147,48 @@ auto Parse::d_register() -> Node* {
 	size id = std::stoi(id_str);
 
 	return new VirtualRegisterNode(reg, id);
+}
+
+auto Parse::type() -> Node* {
+	auto ident = peek();
+	if (!ident->is_type()) parse_error(fmt::format("Token is not type {}", ident->to_string()));
+	advance();
+
+	if (ident->kind == Kind::I8) return new TypeNode(ident, NodeKinds::I8_TYPE_NODE);
+	if (ident->kind == Kind::I16) return new TypeNode(ident, NodeKinds::I16_TYPE_NODE);
+	if (ident->kind == Kind::I32) return new TypeNode(ident, NodeKinds::I32_TYPE_NODE);
+	if (ident->kind == Kind::I64) return new TypeNode(ident, NodeKinds::I64_TYPE_NODE);
+
+	parse_error(fmt::format("Impossible token error for looking for type got {} instead.", ident->to_string()));
+	return nullptr;
+}
+
+auto Parse::bi_node() -> Node* {
+	auto ident = peek();
+	if (!ident->is_bi_instruction()) parse_error(fmt::format("Expected a Bi instruction got {} instead", ident->to_string()));
+
+	advance();
+	consume(Kind::SPACE);
+	auto in_1 = reg();
+	consume(Kind::COMMA);
+	consume(Kind::SPACE);
+	auto in_2 = reg();
+	consume(Kind::SPACE);
+	consume(Kind::RIGHT_ARROW);
+	consume(Kind::SPACE);
+	auto out = v_register();
+	if (ident->kind == Kind::ADD) return new BiNode(ident, in_1, in_2, out, NodeKinds::ADD_NODE);
+	if (ident->kind == Kind::SUBTRACT) return new BiNode(ident, in_1, in_2, out, NodeKinds::SUB_NODE);
+	if (ident->kind == Kind::DIVIDE) return new BiNode(ident, in_1, in_2, out, NodeKinds::DIV_NODE);
+	if (ident->kind == Kind::MULTIPLY) return new BiNode(ident, in_1, in_2, out, NodeKinds::MUL_NODE);
+	if (ident->kind == Kind::AND) return new BiNode(ident, in_1, in_2, out, NodeKinds::AND_NODE);
+	if (ident->kind == Kind::OR) return new BiNode(ident, in_1, in_2, out, NodeKinds::OR_NODE);
+	if (ident->kind == Kind::XOR) return new BiNode(ident, in_1, in_2, out, NodeKinds::XOR_NODE);
+
+	parse_error(fmt::format("Impossible parse for binary instruction got {}.", ident->to_string()));
+
+	return nullptr;
+
 }
 
 auto Parse::advance(i8 n) -> void { idx = idx + n; }

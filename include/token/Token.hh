@@ -36,8 +36,12 @@ class Token {
 		Pos pos;
 
 		auto is_literal() -> bool;
+		auto is_instruction() -> bool;
+		auto is_bi_instruction() -> bool;
+
 		auto is_type() -> bool;
 
+		auto is_register() -> bool;
 		auto to_string() -> std::string;
 };
 

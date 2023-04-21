@@ -24,6 +24,7 @@ namespace hive::ir {
 	Tok(RIGHT_ARROW, "RIGHT_ARROW") \
 	Tok(DASH, "DASH") \
 	Tok(COLON, "COLON") \
+	Tok(COMMA, "COMMA") \
 	Tok(DOT, "DOT") \
 	Tok(POUND, "POUND") \
 	Tok(PIPE, "PIPE") \
@@ -53,16 +54,22 @@ namespace hive::ir {
 		Tok(BINARY_LITERAL, "BINARY_LITERAL") \
 	Tok(LITERAL_END, "") \
 \
-	Tok(INSTRUCTION_START, "") \
-		Tok(ADD, "ADD") \
-		Tok(SUBTRACT, "SUBTRACT") \
-		Tok(DIVIDE, "DIVIDE") \
-		Tok(MULTIPLY, "MULTIPLY") \
-		Tok(AND, "AND") \
-		Tok(OR, "OR") \
-		Tok(XOR, "XOR") \
-		Tok(NOT, "NOT") \
+	Tok(GROUP_START, "") \
 		Tok(LABEL, "LABEL") \
+		Tok(FUNCTION, "FUNCTION") \
+	Tok(GROUP_END, "") \
+\
+	Tok(INSTRUCTION_START, "") \
+		Tok(BI_INSTRUCTION_START, "") \
+			Tok(ADD, "ADD") \
+			Tok(SUBTRACT, "SUBTRACT") \
+			Tok(DIVIDE, "DIVIDE") \
+			Tok(MULTIPLY, "MULTIPLY") \
+			Tok(AND, "AND") \
+			Tok(OR, "OR") \
+			Tok(XOR, "XOR") \
+		Tok(BI_INSTRUCTION_END, "") \
+		Tok(NOT, "NOT") \
 		Tok(COMPARE_EQUALITY, "COMPARE_EQUALITY") \
 		Tok(COMPARE_LESS_THAN, "COMPARE_LESS_THAN") \
 		Tok(COMPARE_GREATER_THAN, "COMPARE_GREATER_THAN") \
@@ -70,7 +77,6 @@ namespace hive::ir {
 		Tok(JUMP_IF, "JUMP_IF") \
 		Tok(JUMP_NOT_EQUAL, "JUMP_NOT_EQUAL") \
 		Tok(JUMP_EQUAL, "JUMP_EQUAL") \
-		Tok(FUNCTION, "FUNCTION") \
 		Tok(RETURN, "RETURN") \
 		Tok(DEREF, "DEREF") \
 		Tok(POINTERTO, "POINTERTO") \

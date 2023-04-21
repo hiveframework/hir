@@ -23,6 +23,8 @@ Lex::Lex(const char* target, LexMode mode) {
 		tokens.push_back(token);
 		advance();
 	}
+
+	tokens.push_back(new Token(Kind::_EOF, Pos(target, idx + 1, line + 1, 1, idx + 1)));
 }
 
 auto Lex::scan_token() -> Token* {
@@ -43,6 +45,7 @@ auto Lex::scan_token() -> Token* {
 			}
 			return new Token(Kind::DASH, Pos(target, start, line, column, idx));
 		}
+		case ',': return new Token(Kind::COMMA, Pos(target,  start, line, column, idx));
 		case ':': return new Token(Kind::COLON, Pos(target, start, line, column, idx));
 		case '#': return new Token(Kind::POUND, Pos(target, start, line, column, idx));
 		case '|': return new Token(Kind::PIPE, Pos(target, start, line, column, idx));

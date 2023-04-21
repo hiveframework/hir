@@ -30,10 +30,15 @@ class Parse {
 
 		auto directive() -> Node*;
 
+		auto reg() -> Node*;
 		auto v_register() -> Node*;
 		auto d_register() -> Node*;
 
 		auto type() -> Node*;
+
+		auto lable() -> Node*;
+
+		auto bi_node() -> Node*;
 
 	private:
 		auto advance(i8 n) -> void;

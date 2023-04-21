@@ -24,13 +24,11 @@ class DigitLiteralNode;
 class OctalLiteralNode;
 class BinaryLiteralNode;
 
-class AddNode;
-class SubNode;
-class DivNode;
-class MulNode;
-class AndNode;
-class OrNode;
-class XorNode;
+class LabelNode;
+class FuncNode;
+
+class BiNode;
+
 class NotNode;
 class LabelNode;
 class CompareEqualityNode;
@@ -156,6 +154,20 @@ class BinaryLiteralNode : public Node {
 
 };
 
+class LabelNode : public Node {
+	public:
+		Token* ident;
+		Node* name;
+		std::vector<Node*> instructions;
+
+		LabelNode(Token* ident, Node* name, std::vector<Node*> instructions) : Node(Kind::LABEL_NODE) {
+			this->ident = ident;
+			this->name = name;
+			this->instructions = instructions;
+		}
+
+};
+
 class TypeNode : public Node {
 	public:
 		Token* ident;
@@ -165,95 +177,22 @@ class TypeNode : public Node {
 		}
 };
 
-class AddNode : public Node {
+class BiNode : public Node {
 	public:
 		Token* ident;
 		Node*  in_1;
 		Node*  in_2;
 		Node*  out;
 
-		AddNode(Token* ident, Node* in_1, Node* in_2, Node* out) : Node(Kind::ADD_NODE){
+		BiNode(Token* ident, Node* in_1, Node* in_2, Node* out, Kind kind) : Node(kind) {
 			this->ident = ident;
 			this->in_1  = in_1;
 			this->in_2  = in_2;
-			this->out   = out ;
+			this->out   = out;
 		}
+
 };
 
-class SubNode : public Node {
-	public:
-		Token* ident;
-		Node*  in_1;
-		Node*  in_2;
-		Node*  out;
-
-		SubNode(Token* ident, Node* in_1, Node* in_2, Node* out) : Node(Kind::SUB_NODE){
-			this->ident = ident;
-			this->in_1  = in_1;
-			this->in_2  = in_2;
-			this->out   = out ;
-		}
-};
-
-class DivNode : public Node {
-	public:
-		Token* ident;
-		Node*  in_1;
-		Node*  in_2;
-		Node*  out;
-
-		DivNode(Token* ident, Node* in_1, Node* in_2, Node* out) : Node(Kind::DIV_NODE){
-			this->ident = ident;
-			this->in_1  = in_1;
-			this->in_2  = in_2;
-			this->out   = out ;
-		}
-};
-
-class MulNode : public Node {
-	public:
-		Token* ident;
-		Node*  in_1;
-		Node*  in_2;
-		Node*  out;
-
-		MulNode(Token* ident, Node* in_1, Node* in_2, Node* out) : Node(Kind::MUL_NODE){
-			this->ident = ident;
-			this->in_1  = in_1;
-			this->in_2  = in_2;
-			this->out   = out ;
-		}
-};
-
-class AndNode : public Node {
-	public:
-		Token* ident;
-		Node*  in_1;
-		Node*  in_2;
-		Node*  out;
-
-		AndNode(Token* ident, Node* in_1, Node* in_2, Node* out) : Node(Kind::AND_NODE){
-			this->ident = ident;
-			this->in_1  = in_1;
-			this->in_2  = in_2;
-			this->out   = out ;
-		}
-};
-
-class XorNode : public Node {
-	public:
-		Token* ident;
-		Node*  in_1;
-		Node*  in_2;
-		Node*  out;
-
-		XorNode(Token* ident, Node* in_1, Node* in_2, Node* out) : Node(Kind::XOR_NODE){
-			this->ident = ident;
-			this->in_1  = in_1;
-			this->in_2  = in_2;
-			this->out   = out ;
-		}
-};
 
 class NotNode : public Node {
 	public:
