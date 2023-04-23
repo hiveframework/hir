@@ -41,14 +41,14 @@ auto Parse::lable() -> Node* {
 
 auto Parse::instruction() -> Node* {
 	switch(peek()->kind) {
-		case Kind::ADD: not_impl("ADD");
+		case Kind::ADD: bi_node();
 		case Kind::DATA: return d_register();
-		case Kind::SUBTRACT: not_impl("SUBTRACT");
-		case Kind::DIVIDE: not_impl("DIVIDE");
-		case Kind::MULTIPLY: not_impl("MULTIPLY");
-		case Kind::AND: not_impl("AND");
-		case Kind::OR: not_impl("OR");
-		case Kind::XOR: not_impl("XOR");
+		case Kind::SUBTRACT: bi_node();
+		case Kind::DIVIDE: bi_node();
+		case Kind::MULTIPLY: bi_node();
+		case Kind::AND: bi_node();
+		case Kind::OR: bi_node();
+		case Kind::XOR: bi_node();
 		case Kind::COMPARE_EQUALITY: not_impl("COMPARE_EQUALITY");
 		case Kind::COMPARE_GREATER_THAN: not_impl("COMPARE_GREATER_THAN");
 		case Kind::COMPARE_LESS_THAN: not_impl("COMPARE_GREATER_THAN");
