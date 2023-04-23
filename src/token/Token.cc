@@ -33,6 +33,8 @@ auto Token::is_type() -> bool { return (Kind::TYPE_START < kind && kind < Kind::
 auto Token::is_instruction() -> bool { return (Kind::INSTRUCTION_START < kind && kind < Kind::INSTRUCTION_END); }
 auto Token::is_bi_instruction() -> bool { return (Kind::BI_INSTRUCTION_START < kind && kind < Kind::BI_INSTRUCTION_END); }
 auto Token::is_register() -> bool { return (Kind::REISTER_START < kind && kind < Kind::REISTER_END); }
+auto Token::is_compare() -> bool { return (Kind::COMPARE_START < kind && kind < Kind::COMPARE_END); }
+auto Token::is_jump() -> bool { return (Kind::JUMP_START < kind && kind < Kind::JUMP_END); }
 
 auto Token::to_string() -> std::string {
 	return fmt::format("Token{{name={}, kind={}, {}}}", name, name_from_kind(kind), pos.to_string());

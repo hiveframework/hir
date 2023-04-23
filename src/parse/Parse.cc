@@ -49,9 +49,9 @@ auto Parse::instruction() -> Node* {
 		case Kind::AND: bi_node();
 		case Kind::OR: bi_node();
 		case Kind::XOR: bi_node();
-		case Kind::COMPARE_EQUALITY: not_impl("COMPARE_EQUALITY");
-		case Kind::COMPARE_GREATER_THAN: not_impl("COMPARE_GREATER_THAN");
-		case Kind::COMPARE_LESS_THAN: not_impl("COMPARE_GREATER_THAN");
+		case Kind::COMPARE_EQUALITY: compare();
+		case Kind::COMPARE_GREATER_THAN: compare();
+		case Kind::COMPARE_LESS_THAN: compare();
 		case Kind::JUMP: not_impl("JUMP");
 		case Kind::JUMP_IF: not_impl("JUMP_IF");
 		case Kind::JUMP_NOT_EQUAL: not_impl("JUMP_NOT_EQUAL");
@@ -61,7 +61,9 @@ auto Parse::instruction() -> Node* {
 		case Kind::CALL: not_impl("CALL");
 		case Kind::STORE: not_impl("STORE");
 		case Kind::WRITE: not_impl("WRITE"); //Question(anita): should we rename this to load that makes more sense to me?
-		case Kind::_DEBUG: not_impl("DEBUG");
+		case Kind::_DEBUG: {
+				parse_error("DEBUG is not implemented!");
+		};
 		case Kind::STATIC: not_impl("STATIC");
 
 		default:
@@ -118,7 +120,6 @@ auto Parse::directive() -> Node* {
 	}
 
 	return new DirectiveNode(ident, lit, nodes);
-
 }
 
 auto Parse::reg() -> Node* {
@@ -188,7 +189,29 @@ auto Parse::bi_node() -> Node* {
 	parse_error(fmt::format("Impossible parse for binary instruction got {}.", ident->to_string()));
 
 	return nullptr;
+}
 
+/**
+ * Parse out the comparioson nodes
+ *
+ * COMPARE_GREATER_THAN
+ * COMPARE_EQUALITY
+ * COMPARE_LESS_THAN
+ */
+auto Parse::compare() -> Node* {
+	auto ident = peek();
+	consume(Kind::SPACE);
+	auto in_1 = reg();
+	consume(Kind::COMMA);
+	consume(Kind::SPACE);
+	auto in_2 = reg();
+
+	if (ident->kind == Kind::COMPARE_EQUALITY) return new CompareNode(ident, in_1, in_2, NodeKinds::COMPARE_EQUALITY_NODE);
+	if (ident->kind == Kind::COMPARE_GREATER_THAN) return new CompareNode(ident, in_1, in_2, NodeKinds::COMPARE_GREATER_THAN_NODE);
+	if (ident->kind == Kind::COMPARE_LESS_THAN) return new CompareNode(ident, in_1, in_2, NodeKinds::COMPARE_LESS_THAN_NODE);
+
+	parse_error(fmt::format("Impossible token found for comparision identifer -> {}", ident->to_string()));
+	return nullptr;
 }
 
 auto Parse::advance(i8 n) -> void { idx = idx + n; }

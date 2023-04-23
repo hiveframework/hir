@@ -39,6 +39,8 @@ class Parse {
 		auto lable() -> Node*;
 
 		auto bi_node() -> Node*;
+		auto compare() -> Node*;
+		auto jump() -> Node*;
 
 	private:
 		auto advance(i8 n) -> void;

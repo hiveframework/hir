@@ -42,6 +42,8 @@ class Token {
 		auto is_type() -> bool;
 
 		auto is_register() -> bool;
+		auto is_compare() -> bool;
+		auto is_jump() -> bool;
 		auto to_string() -> std::string;
 };
 
