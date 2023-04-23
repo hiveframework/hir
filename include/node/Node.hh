@@ -271,13 +271,15 @@ class PointerToNode : public Node {
 class CallNode : public Node {
 	public:
 		Token* ident;
-		std::vector<Node*> function;
+		Node* lib;
+		Node* function;
 		std::vector<Node*> params;
 
-		CallNode(Token* ident, std::vector<Node*> function, std::vector<Node*> params) : Node(Kind::CALL_NODE) {
-			this->ident     = ident;
-			this-> function = function;
-			this->params    = params;
+		CallNode(Token* ident, Node* lib, Node* function, std::vector<Node*> params) : Node(Kind::CALL_NODE) {
+			this->ident    = ident;
+			this->lib      = lib;
+			this->function = function;
+			this->params   = params;
 		}
 };
 

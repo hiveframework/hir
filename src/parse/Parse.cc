@@ -41,26 +41,27 @@ auto Parse::lable() -> Node* {
 
 auto Parse::instruction() -> Node* {
 	switch(peek()->kind) {
-		case Kind::ADD: bi_node();
+		case Kind::ADD: return bi_node();
 		case Kind::DATA: return d_register();
-		case Kind::SUBTRACT: bi_node();
-		case Kind::DIVIDE: bi_node();
-		case Kind::MULTIPLY: bi_node();
-		case Kind::AND: bi_node();
-		case Kind::OR: bi_node();
-		case Kind::XOR: bi_node();
-		case Kind::COMPARE_EQUALITY: compare();
-		case Kind::COMPARE_GREATER_THAN: compare();
-		case Kind::COMPARE_LESS_THAN: compare();
-		case Kind::JUMP: not_impl("JUMP");
-		case Kind::JUMP_IF: not_impl("JUMP_IF");
-		case Kind::JUMP_NOT_EQUAL: not_impl("JUMP_NOT_EQUAL");
-		case Kind::RETURN: not_impl("RETURN");
-		case Kind::DEREF: not_impl("DEREF");
-		case Kind::POINTERTO: not_impl("POINTERTO");
-		case Kind::CALL: not_impl("CALL");
-		case Kind::STORE: not_impl("STORE");
-		case Kind::WRITE: not_impl("WRITE"); //Question(anita): should we rename this to load that makes more sense to me?
+		case Kind::SUBTRACT: return bi_node();
+		case Kind::DIVIDE: return bi_node();
+		case Kind::MULTIPLY: return bi_node();
+		case Kind::AND: return bi_node();
+		case Kind::OR: return bi_node();
+		case Kind::XOR: return bi_node();
+		case Kind::NOT: return _not();
+		case Kind::COMPARE_EQUALITY: return compare();
+		case Kind::COMPARE_GREATER_THAN: return compare();
+		case Kind::COMPARE_LESS_THAN: return compare();
+		case Kind::JUMP: return jump();
+		case Kind::JUMP_IF: return jump();
+		case Kind::JUMP_NOT_EQUAL: return jump();
+		case Kind::RETURN: return  _return();
+		case Kind::DEREF: return de_ref();
+		case Kind::POINTERTO: return ptr_to();
+		case Kind::CALL: return call();
+		case Kind::STORE: return store();
+		case Kind::WRITE: return write();
 		case Kind::_DEBUG: {
 				parse_error("DEBUG is not implemented!");
 		};
@@ -164,6 +165,16 @@ auto Parse::type() -> Node* {
 	return nullptr;
 }
 
+/**
+ * Parse out all the bi nodes
+ * ADD
+ * SUBTRACT
+ * DIVIDE
+ * MULTIPLY
+ * AND
+ * OR
+ * XOR
+ */
 auto Parse::bi_node() -> Node* {
 	auto ident = peek();
 	if (!ident->is_bi_instruction()) parse_error(fmt::format("Expected a Bi instruction got {} instead", ident->to_string()));
@@ -200,6 +211,8 @@ auto Parse::bi_node() -> Node* {
  */
 auto Parse::compare() -> Node* {
 	auto ident = peek();
+	if (!ident->is_compare()) parse_error(fmt::format("{{}} \n\t is not a comparioson node", ident->name));
+
 	consume(Kind::SPACE);
 	auto in_1 = reg();
 	consume(Kind::COMMA);
@@ -212,6 +225,131 @@ auto Parse::compare() -> Node* {
 
 	parse_error(fmt::format("Impossible token found for comparision identifer -> {}", ident->to_string()));
 	return nullptr;
+}
+
+/**
+ * JUMP
+ * JUMP_EQUAL
+ * JUMP_IF
+ * JUMP_NOT_EQUAL
+ */
+auto Parse::jump() -> Node* {
+	auto ident = peek();
+	if (!ident->is_jump()) parse_error(fmt::format("{{}} \n\t is not a jump node", ident->name));
+
+	consume(Kind::SPACE);
+	auto in_1 = reg();
+	consume(Kind::COMMA);
+	consume(Kind::SPACE);
+	auto in_2 = reg();
+
+	if (ident->kind == Kind::JUMP) return new JumpNode(ident, in_1, in_2, NodeKinds::JUMP_NODE);
+	if (ident->kind == Kind::JUMP_EQUAL) return new JumpNode(ident, in_1, in_2, NodeKinds::JUMP_EQUAL_NODE);
+	if (ident->kind == Kind::JUMP_IF) return new JumpNode(ident, in_1, in_2, NodeKinds::JUMP_IF_NODE);
+	if (ident->kind == Kind::JUMP_NOT_EQUAL) return new JumpNode(ident, in_1, in_2, NodeKinds::JUMP_NOT_EQUAL_NODE);
+
+	parse_error(fmt::format("Impossible token found for comparision identifer -> {}", ident->to_string()));
+	return nullptr;
+}
+
+auto Parse::_not() -> Node* {
+	auto ident = consume(Kind::NOT);
+	consume(Kind::SPACE);
+
+	auto in = reg();
+
+	consume(Kind::SPACE);
+	consume(Kind::RIGHT_ARROW);
+	consume(Kind::SPACE);
+
+	auto out = reg();
+
+	return new NotNode(ident, in, out);
+}
+
+auto Parse::_return() -> Node* {
+	auto ident = consume(Kind::RETURN);
+	consume(Kind::SPACE);
+	auto target = reg();
+	return new ReturnNode(ident, target);
+}
+
+auto Parse::de_ref() -> Node* {
+	auto ident = consume(Kind::DEREF);
+
+	consume(Kind::SPACE);
+
+	auto in = reg();
+
+	consume(Kind::SPACE);
+	consume(Kind::RIGHT_ARROW);
+	consume(Kind::SPACE);
+
+	auto out = reg();
+
+	return new DerefNode(ident, in, out);
+}
+
+auto Parse::ptr_to() -> Node* {
+	auto ident = consume(Kind::POINTERTO);
+
+	consume(Kind::SPACE);
+	auto in = reg();
+	consume(Kind::SPACE);
+	auto out = reg();
+
+	return new PointerToNode(ident, in, out);
+}
+
+auto Parse::call() -> Node* {
+	auto ident = consume(Kind::CALL);
+
+	consume(Kind::SPACE);
+	auto lib = literal();
+	consume(Kind::DOT);
+	auto func = literal();
+
+	std::vector<Node*> params;
+	params.push_back(reg());
+
+
+	for(;;) {
+		if (check(Kind::EOL)) break;
+		consume(Kind::COMMA);
+		params.push_back(reg());
+	}
+
+	return new CallNode(ident, lib, func, params);
+}
+
+auto Parse::store() -> Node* {
+	auto ident = consume(Kind::STORE);
+
+	consume(Kind::SPACE);
+
+	auto value = reg();
+
+	consume(Kind::SPACE);
+	consume(Kind::RIGHT_ARROW);
+	consume(Kind::SPACE);
+
+	auto out = reg();
+	return new StoreNode(ident, value, out);
+}
+
+auto Parse::write() -> Node* {
+	auto ident = consume(Kind::WRITE);
+
+	consume(Kind::SPACE);
+
+	auto value = reg();
+
+	consume(Kind::SPACE);
+	consume(Kind::RIGHT_ARROW);
+	consume(Kind::SPACE);
+
+	auto out = reg();
+	return new WriteNode(ident, value, out);
 }
 
 auto Parse::advance(i8 n) -> void { idx = idx + n; }

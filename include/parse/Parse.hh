@@ -41,6 +41,13 @@ class Parse {
 		auto bi_node() -> Node*;
 		auto compare() -> Node*;
 		auto jump() -> Node*;
+		auto _not() -> Node*;
+		auto _return() -> Node*;
+		auto de_ref() -> Node*;
+		auto ptr_to() -> Node*;
+		auto call() -> Node*;
+		auto store() -> Node*;
+		auto write() -> Node*;
 
 	private:
 		auto advance(i8 n) -> void;
