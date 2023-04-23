@@ -30,14 +30,10 @@ class FuncNode;
 class BiNode;
 
 class NotNode;
-class LabelNode;
-class CompareEqualityNode;
-class CompareLessThanNode;
-class CompareGreaterThanNode;
-class JumpIfNode;
-class JumpNotEqualNode;
-class JumpEqualNode;
-class FunctionNode;
+
+class CompareNode;
+class JumpNode;
+
 class ReturnNode;
 class DerefNode;
 class PointerToNode;
@@ -151,7 +147,6 @@ class BinaryLiteralNode : public Node {
 		BinaryLiteralNode(Token* ident) : Node(Kind::HEX_LITERAL_NODE) {
 			this->ident = ident;
 		}
-
 };
 
 class LabelNode : public Node {
@@ -165,15 +160,18 @@ class LabelNode : public Node {
 			this->name = name;
 			this->instructions = instructions;
 		}
-
 };
 
-class TypeNode : public Node {
-	public:
-		Token* ident;
+class FuncNode : public Node {
+	Token* ident;
+	Token* name;
+	std::vector<Node*> registers;
 
-		TypeNode(Token* ident, Kind kind) : Node(kind) {
-			this->ident = ident;
+	public:
+		FuncNode(Token* ident, Token* name, std::vector<Node*> registers) : Node(Kind::FUNCTION_NODE) {
+			this->ident     = ident;
+			this->name      = name;
+			this->registers = registers;
 		}
 };
 
@@ -190,9 +188,7 @@ class BiNode : public Node {
 			this->in_2  = in_2;
 			this->out   = out;
 		}
-
 };
-
 
 class NotNode : public Node {
 	public:
@@ -204,6 +200,146 @@ class NotNode : public Node {
 			this->ident = ident;
 			this->in    = in;
 			this->out   = out ;
+		}
+};
+
+//Note(anita): A catch all for all the compare node types
+class CompareNode : public Node {
+	public:
+		Token* ident;
+		Node* in_1;
+		Node* in_2;
+
+		CompareNode(Token* ident, Node* in_1, Node* in_2, Kind kind) : Node(kind) {
+			this->ident = ident;
+			this->in_1  = in_1;
+			this->in_2  = in_2;
+		}
+};
+
+//Note(anita): A catch all for all the jump node types
+class JumpNode : public Node {
+	public:
+		Token* ident;
+		Node* in_1;
+		Node* in_2;
+
+		JumpNode(Token* ident, Node* in_1, Node* in_2, Kind kind) : Node(kind) {
+			this->ident = ident;
+			this->in_1  = in_1;
+			this->in_2  = in_2;
+		}
+};
+
+class ReturnNode : public Node {
+	public:
+		Token* ident;
+		Node* reg;
+
+		ReturnNode(Token* ident, Node* reg) : Node(Kind::RETURN_NODE) {
+			this->ident = ident;
+			this->reg   = reg;
+		}
+};
+
+class DerefNode : public Node {
+	public:
+		Token* ident;
+		Node* reg;
+		Node* out;
+
+		DerefNode(Token* ident, Node* reg, Node* out) : Node(Kind::DEREF_NODE) {
+			this->ident = ident;
+			this->reg   = reg;
+			this->out   = out;
+		}
+};
+
+class PointerToNode : public Node {
+	public:
+		Token* ident;
+		Node* reg;
+		Node* out;
+
+		PointerToNode(Token* ident, Node* reg, Node* out) : Node(Kind::DEREF_NODE) {
+			this->ident = ident;
+			this->reg   = reg;
+			this->out   = out;
+		}
+};
+
+class CallNode : public Node {
+	public:
+		Token* ident;
+		std::vector<Node*> function;
+		std::vector<Node*> params;
+
+		CallNode(Token* ident, std::vector<Node*> function, std::vector<Node*> params) : Node(Kind::CALL_NODE) {
+			this->ident     = ident;
+			this-> function = function;
+			this->params    = params;
+		}
+};
+
+class StoreNode : public Node {
+	public:
+		Token* ident;
+		Node* value;
+		Node* reg;
+
+		StoreNode(Token* ident, Node* value, Node* reg) : Node(Kind::STORE_NODE) {
+			this->ident = ident;
+			this->value = value;
+			this->reg   = reg;
+		}
+};
+
+class WriteNode : public Node {
+
+	public:
+		Token* ident;
+		Node* value;
+		Node* reg;
+
+		WriteNode(Token* ident, Node* value, Node* reg) : Node(Kind::WRITE_NODE) {
+			this->ident = ident;
+			this->value = value;
+			this->reg   = reg;
+		}
+};
+
+class DataStaticNode : public Node {
+	public:
+		Node* data_register;
+		Token* ident;
+		Node* literal;
+
+		DataStaticNode(Node* data_register, Token* ident, Node* literal) : Node(Kind::DATA_STATIC_NODE) {
+			this->data_register = data_register;
+			this->ident         = ident;
+			this->literal       = literal;
+		}
+};
+
+class DataStructNode : public Node {
+	public:
+		Node* data_register;
+		Token* ident;
+		Node* literal;
+
+		DataStructNode(Node* data_register, Token* ident, Node* literal) : Node(Kind::DATA_STATIC_NODE) {
+			this->data_register = data_register;
+			this->ident         = ident;
+			this->literal       = literal;
+		}
+};
+
+class TypeNode : public Node {
+	public:
+		Token* ident;
+
+		TypeNode(Token* ident, Kind kind) : Node(kind) {
+			this->ident = ident;
 		}
 };
 }
