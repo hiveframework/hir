@@ -9,9 +9,6 @@ Node::Node(Kind kind) {
 	For (node_name_map) {
 		if (kind == it.first) {
 			this->node_name = it.second;
-		} else {
-			fmt::println("Error getting node kind");
-			std::exit(-1);
 		}
 	}
 }
