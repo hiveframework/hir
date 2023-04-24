@@ -6,7 +6,6 @@
 
 #pragma once
 
-
 #include <Defs.hh>
 #include <map>
 
@@ -78,6 +77,3 @@ const std::map<NodeKinds, std::string> node_name_map =  {
 		NODE_KIND_NAME_LIST
 	#undef _Node
 };
-
-auto name_from_node(NodeKinds kind) -> std::string;
-auto node_from_name(std::string name) -> NodeKinds;

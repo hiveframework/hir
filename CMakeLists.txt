@@ -14,12 +14,13 @@ set(HIR_SRC
 	src/Main.cc
 
 	src/parse/Lex.cc
+	src/parse/Parse.cc
 
 	src/token/Token.cc
 	src/token/TokenKind.cc
 
 	src/node/NodeKind.cc
-	src/parse/Parse.cc
+	src/node/Node.cc
 )
 
 add_definitions( -DDEBUG=1)

@@ -10,17 +10,27 @@ namespace hive::ir {
 
 Parse::Parse(Lex& lex) : lex(lex) {}
 
-auto Parse::init_parse() -> Node* {
-	while (check(Kind::_EOF)) {
+auto Parse::construct() -> ProgNode* {
+	std::vector<Node*> nodes;
+	idx = -1;
+	while(!check(Kind::_EOF)) {
+		auto grp = groups();
+		nodes.push_back(grp);
+	}
+	return new ProgNode(nodes);
+}
+
+auto Parse::groups() -> Node* {
 		switch(peek()->kind) {
 			case Kind::POUND: return directive();
-			case Kind::LABEL: not_impl("LABEL");
+			case Kind::LABEL: return lable();
 			case Kind::FUNCTION: not_impl("FUNCTION");
+			default: {
+				parse_error(fmt::format("Illegal token found", peek()->to_string()));
+			}
 		}
-	}
 	return nullptr;
 };
-
 
 auto Parse::lable() -> Node* {
 	auto ident = consume(Kind::LABEL);
@@ -42,7 +52,31 @@ auto Parse::lable() -> Node* {
 auto Parse::instruction() -> Node* {
 	switch(peek()->kind) {
 		case Kind::ADD: return bi_node();
-		case Kind::DATA: return d_register();
+		case Kind::DATA: {
+			auto data = d_register();
+
+			consume(Kind::SPACE);
+
+			if (peek()->is_literal()) {
+				auto lit = literal();
+				return new DataStaticNode(data, nullptr, {lit}, nullptr);
+			} else if (check(Kind::OPEN_BRACE)) {
+				std::vector<Node*> types;
+				auto open = consume(Kind::OPEN_BRACE);
+				for(;;) {
+
+					consume(TokenKind::SPACE);
+					if (check(Kind::CLOSE_BRACE)) break;
+					types.push_back(type());
+				}
+				auto close = consume(Kind::CLOSE_BRACE);
+				return new DataStaticNode(data, open, types, close);
+			} else {
+				parse_error(fmt::format("Illegal token for data struct expected a literal or a set of values \n\t {}", peek()->to_string()));
+
+			}
+			parse_error(fmt::format("Illegal token only STATIC is supported got {}", peek()->to_string()));
+		}
 		case Kind::SUBTRACT: return bi_node();
 		case Kind::DIVIDE: return bi_node();
 		case Kind::MULTIPLY: return bi_node();
@@ -65,7 +99,6 @@ auto Parse::instruction() -> Node* {
 		case Kind::_DEBUG: {
 				parse_error("DEBUG is not implemented!");
 		};
-		case Kind::STATIC: not_impl("STATIC");
 
 		default:
 			parse_error(fmt::format("Illegal token found {}", peek()->to_string()));
@@ -111,6 +144,7 @@ auto Parse::literal() -> Node* {
 }
 
 auto Parse::directive() -> Node* {
+	fmt::println("Consumeing directive");
 	auto ident = consume(Kind::POUND);
 	auto lit   = literal();
 	std::vector<Token*> nodes;
@@ -148,7 +182,7 @@ auto Parse::d_register() -> Node* {
 	auto id_str = str.substr(1);
 	size id = std::stoi(id_str);
 
-	return new VirtualRegisterNode(reg, id);
+	return new DataRegisterNode(reg, id);
 }
 
 auto Parse::type() -> Node* {

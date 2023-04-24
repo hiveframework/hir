@@ -23,7 +23,10 @@ class Parse {
 	public:
 		Parse(Lex& lex);
 
-		auto init_parse() -> Node*;
+		auto construct() -> ProgNode*;
+
+	private:
+		auto groups() -> Node*;
 		auto instruction() -> Node*;
 
 		auto literal() ->	Node*;

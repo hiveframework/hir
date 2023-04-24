@@ -11,6 +11,9 @@
 
 namespace hive::ir {
 
+
+class ProgNode;
+
 class Node;
 
 class VirtualRegisterNode;
@@ -45,19 +48,24 @@ class DataStaticNode;
 class DataStructNode;
 class TypeNode;
 
+class ProgNode {
+	public:
+		std::vector<Node*> nodes;
+
+		ProgNode(std::vector<Node*> nodes) {
+			this->nodes = nodes;
+		}
+};
+
 class Node {
 	public:
 		using Kind = NodeKinds;
 
-		Node(Kind kind) {
-			this->kind = kind;
-		}
+		Node(Kind kind);
 
-		auto get_node_kind() -> Kind {return kind;}
-		auto get_node_name() -> std::string {return name_from_node(kind);}
-
-	private:
+	public:
 		Kind kind;
+		std::string node_name;
 };
 
 class VirtualRegisterNode : public Node {
@@ -313,13 +321,15 @@ class WriteNode : public Node {
 class DataStaticNode : public Node {
 	public:
 		Node* data_register;
-		Token* ident;
-		Node* literal;
+		Token* start;
+		std::vector<Node*> types;
+		Token* end;
 
-		DataStaticNode(Node* data_register, Token* ident, Node* literal) : Node(Kind::DATA_STATIC_NODE) {
-			this->data_register = data_register;
-			this->ident         = ident;
-			this->literal       = literal;
+		DataStaticNode(Node* d_reg, Token* start, std::vector<Node*> types, Token* end) : Node(Kind::DATA_STATIC_NODE){
+			this->data_register = d_reg;
+			this->start         = start;
+			this->types         = types;
+			this->end           = end;
 		}
 };
 
