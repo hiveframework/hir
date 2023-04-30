@@ -108,12 +108,6 @@ enum class TokenKind {
 	#undef Tok
 };
 
-const std::map<TokenKind, std::string> token_kind_name_map = {
-	#define Tok(kind, name) {TokenKind::kind, name},
-		TOKEN_TYPES_LIST
-	#undef Tok
-};
-
 auto name_from_kind(TokenKind kind) -> std::string;
 auto kind_from_name(std::string name) -> TokenKind;
 

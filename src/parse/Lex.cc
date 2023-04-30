@@ -183,7 +183,7 @@ auto Lex::concat_ident() -> Token* {
 		advance();
 	}
 	idx--;//Note(anita):  A gross hack I know but I don't care 4/14/2023
-	return new Token(str, Kind::IDENT_LITERAL, Pos(target, start, line, column, idx));
+	return new Token(str, Pos(target, start, line, column, idx));
 }
 
 auto Lex::peek(i8 n) -> char { return buffer[idx + n];}
@@ -194,7 +194,7 @@ auto Lex::check(char c) -> bool { return check(1, c); }
 
 auto Lex::advance(i8 n) -> void {
 	idx = idx + n;
-	line = line + n;
+	column = column + n;
 }
 
 auto Lex::advance() -> void { advance(1); }
