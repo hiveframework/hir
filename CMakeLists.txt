@@ -21,6 +21,10 @@ set(HIR_SRC
 
 	src/node/NodeKind.cc
 	src/node/Node.cc
+
+	src/codegen/ICodegen.cc
+
+	src/codegen/MacArm64Codegen.cc
 )
 
 add_definitions( -DDEBUG=1)

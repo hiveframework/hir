@@ -8,11 +8,13 @@
 
 namespace hive::ir {
 
-Parse::Parse(Lex& lex) : lex(lex) {}
+Parse::Parse(Lex* lex) {
+	this->idx = -1;
+	this->lex = lex;
+}
 
 auto Parse::construct() -> ProgNode* {
 	std::vector<Node*> nodes;
-	idx = -1;
 	while(!check(Kind::_EOF)) {
 		auto grp = groups();
 		nodes.push_back(grp);
@@ -21,62 +23,53 @@ auto Parse::construct() -> ProgNode* {
 }
 
 auto Parse::groups() -> Node* {
-		switch(peek()->kind) {
-			case Kind::POUND: return directive();
-			case Kind::LABEL: return lable();
-			case Kind::FUNCTION: not_impl("FUNCTION");
-			default: {
-				parse_error(fmt::format("Illegal token found", peek()->to_string()));
-			}
+	switch(peek()->kind) {
+		case Kind::POUND: {
+			auto direct = directive();
+			consume(Kind::EOL);
+			fmt::println("{}",direct->node_name);
+			return direct;
 		}
+		case Kind::LABEL: {
+			return label();
+		}
+		case Kind::FUNCTION: not_impl("FUNCTION");
+		case Kind::EOL:
+			consume(Kind::EOL);
+			return groups();
+		default: {
+			parse_error(fmt::format("Illegal token '{}' found  for group.", peek()->short_to_string()));
+		}
+	}
 	return nullptr;
 };
 
-auto Parse::lable() -> Node* {
+auto Parse::label() -> Node* {
+	Log("Starting Label")
 	auto ident = consume(Kind::LABEL);
 	consume(Kind::SPACE);
-	auto name = literal();
+	auto name = (IdentLiteralNode*)literal();
 	consume(Kind::COLON);
 	consume(Kind::EOL);
 
-	std::vector<Node*> lables;
+	std::vector<Node*> labels;
+	consume(Kind::TAB);
+	int id = 0;
 	while(!check(Kind::TAB)) {
-		consume(Kind::TAB);
 		auto inst = instruction();
+		Log(fmt::format("\t\t{} {}", inst->node_name, id))
+		labels.push_back(inst);
+		Log(peek()->short_to_string())
 		consume(Kind::EOL);
 	}
-
-	return new LabelNode(ident, name, lables);
+	Log("Ending Label")
+	return new LabelNode(ident, name, labels);
 }
 
 auto Parse::instruction() -> Node* {
 	switch(peek()->kind) {
 		case Kind::ADD: return bi_node();
-		case Kind::DATA: {
-			auto data = d_register();
-
-			consume(Kind::SPACE);
-
-			if (peek()->is_literal()) {
-				auto lit = literal();
-				return new DataStaticNode(data, nullptr, {lit}, nullptr);
-			} else if (check(Kind::OPEN_BRACE)) {
-				std::vector<Node*> types;
-				auto open = consume(Kind::OPEN_BRACE);
-				for(;;) {
-
-					consume(TokenKind::SPACE);
-					if (check(Kind::CLOSE_BRACE)) break;
-					types.push_back(type());
-				}
-				auto close = consume(Kind::CLOSE_BRACE);
-				return new DataStaticNode(data, open, types, close);
-			} else {
-				parse_error(fmt::format("Illegal token for data struct expected a literal or a set of values \n\t {}", peek()->to_string()));
-
-			}
-			parse_error(fmt::format("Illegal token only STATIC is supported got {}", peek()->to_string()));
-		}
+		case Kind::DATA: return data();
 		case Kind::SUBTRACT: return bi_node();
 		case Kind::DIVIDE: return bi_node();
 		case Kind::MULTIPLY: return bi_node();
@@ -107,16 +100,17 @@ auto Parse::instruction() -> Node* {
 }
 
 auto Parse::literal() -> Node* {
-	if (!peek()->is_literal()) parse_error("Expected a literal");
 
 	if (check(Kind::IDENT_LITERAL)) {
 		auto ident = consume(Kind::IDENT_LITERAL);
 		return new IdentLiteralNode(ident);
 	}
 
-	if (check(Kind::STRING_LITERAL)) {
+	if (check(Kind::DOUBLE_QUOTE)) {
+		auto start = consume(Kind::DOUBLE_QUOTE);
 		auto ident = consume(Kind::STRING_LITERAL);
-		return new StringLiteralNode(peek());
+		auto end   = consume(Kind::DOUBLE_QUOTE);
+		return new StringLiteralNode(start, ident, end);
 	}
 
 	if (check(Kind::HEX_LITERAL)) {
@@ -144,7 +138,6 @@ auto Parse::literal() -> Node* {
 }
 
 auto Parse::directive() -> Node* {
-	fmt::println("Consumeing directive");
 	auto ident = consume(Kind::POUND);
 	auto lit   = literal();
 	std::vector<Token*> nodes;
@@ -182,6 +175,7 @@ auto Parse::d_register() -> Node* {
 	auto id_str = str.substr(1);
 	size id = std::stoi(id_str);
 
+
 	return new DataRegisterNode(reg, id);
 }
 
@@ -197,6 +191,34 @@ auto Parse::type() -> Node* {
 
 	parse_error(fmt::format("Impossible token error for looking for type got {} instead.", ident->to_string()));
 	return nullptr;
+}
+
+auto Parse::data() -> Node* {
+	auto data = d_register();
+	Log("processing data node")
+	consume(Kind::SPACE);
+	consume(Kind::STATIC);
+	consume(Kind::SPACE);
+
+	if (peek()->is_literal() || check(Kind::DOUBLE_QUOTE)) {
+		auto lit = literal();
+		return new DataStaticNode(data, nullptr, {lit}, nullptr);
+	} else if (check(Kind::OPEN_BRACE)) {
+		std::vector<Node*> types;
+		auto open = consume(Kind::OPEN_BRACE);
+		for(;;) {
+
+			consume(TokenKind::SPACE);
+			if (check(Kind::CLOSE_BRACE)) break;
+			types.push_back(type());
+		}
+		auto close = consume(Kind::CLOSE_BRACE);
+		return new DataStaticNode(data, open, types, close);
+	} else {
+		parse_error(fmt::format("Illegal token for DATA STRUCT expected a literal or a set of values \n\t {}", peek()->to_string()));
+	}
+
+	parse_error(fmt::format("Illegal token only STATIC is supported got {}", peek()->to_string()));
 }
 
 /**
@@ -389,7 +411,7 @@ auto Parse::write() -> Node* {
 auto Parse::advance(i8 n) -> void { idx = idx + n; }
 auto Parse::advance() -> void { advance(1); }
 
-auto Parse::peek(i8 n) -> Token* {return lex.tokens.at(idx + n);}
+auto Parse::peek(i8 n) -> Token* {return lex->tokens.at(idx + n);}
 auto Parse::peek() -> Token* { return peek(1); }
 
 auto Parse::check(i8 n, Kind kind) -> bool { return kind == peek(n)->kind; }

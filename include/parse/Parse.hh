@@ -17,11 +17,11 @@ class Parse {
 	private:
 		using Kind  = TokenKind;
 		using Error = ErrorCode;
-		Lex& lex;
-		size idx;
+		Lex* lex;
+		size idx = -1;
 
 	public:
-		Parse(Lex& lex);
+		Parse(Lex* lex);
 
 		auto construct() -> ProgNode*;
 
@@ -39,8 +39,9 @@ class Parse {
 
 		auto type() -> Node*;
 
-		auto lable() -> Node*;
+		auto label() -> Node*;
 
+		auto data() -> Node*;
 		auto bi_node() -> Node*;
 		auto compare() -> Node*;
 		auto jump() -> Node*;

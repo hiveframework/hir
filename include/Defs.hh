@@ -26,6 +26,7 @@ using size = size_t;
 #define LogRaw(msg) fmt::print("[LOG] {} ", msg);
 #define Warn(msg) fmt::print("[WARN] {}\n", msg);
 #define Panic(msg) fmt::print("[PANIC] {}:{}\n{}\n",__FILE__, __LINE__, fmt::format(fg(fmt::color::red), msg)); std::exit(-1);
+
 #define For(iterable) for (auto& it : iterable)
 
 #ifdef DEBUG

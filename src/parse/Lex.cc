@@ -1,3 +1,4 @@
+#include <Defs.hh>
 #include <token/Token.hh>
 #include <parse/Lex.hh>
 

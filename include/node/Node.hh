@@ -114,9 +114,11 @@ class IdentLiteralNode : public Node {
 
 class StringLiteralNode : public Node {
 	public:
+		Token* start;
 		Token* ident;
+		Token* end;
 
-		StringLiteralNode(Token* ident) : Node(Kind::STRING_LITERAL_NODE) {
+		StringLiteralNode(Token* start, Token* ident, Token* end) : Node(Kind::STRING_LITERAL_NODE) {
 			this->ident = ident;
 		}
 };

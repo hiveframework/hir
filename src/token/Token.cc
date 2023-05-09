@@ -40,4 +40,8 @@ auto Token::to_string() -> std::string {
 	return fmt::format("Token{{name={}, kind={}, {}}}", name, name_from_kind(kind), pos.to_string());
 }
 
+auto Token::short_to_string() -> std::string {
+	return fmt::format("[{} @ {}:{}]", name, pos.line, pos.column);
+}
+
 }
