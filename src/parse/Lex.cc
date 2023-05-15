@@ -11,6 +11,7 @@ namespace hive::ir {
 
 Lex::Lex(const char* target, LexMode mode) {
 	load_target(target);
+	this->target = target;
 
 	//Hack(anita): Added this here because version must be at the top of this and this is a look ahead
 	if (check(0,'#')) {

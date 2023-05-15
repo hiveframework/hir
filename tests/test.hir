@@ -6,6 +6,8 @@
 #entry main
 
 LABEL main:
-	d0 STATIC "Hello, World!\n"
+	d1 { i8 i32 i16 i64 }
+	d2 STATIC "Hello, World!\n"
 	CALL libc.printf d0
-	RETURN 0
+	d4 STATIC 0
+

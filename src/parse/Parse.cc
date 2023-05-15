@@ -27,7 +27,6 @@ auto Parse::groups() -> Node* {
 		case Kind::POUND: {
 			auto direct = directive();
 			consume(Kind::EOL);
-			fmt::println("{}",direct->node_name);
 			return direct;
 		}
 		case Kind::LABEL: {
@@ -45,25 +44,25 @@ auto Parse::groups() -> Node* {
 };
 
 auto Parse::label() -> Node* {
-	Log("Starting Label")
-	auto ident = consume(Kind::LABEL);
+	auto label = consume(Kind::LABEL);
 	consume(Kind::SPACE);
-	auto name = (IdentLiteralNode*)literal();
+	auto name = literal();
 	consume(Kind::COLON);
 	consume(Kind::EOL);
+	std::vector<Node*> instructions;
 
-	std::vector<Node*> labels;
-	consume(Kind::TAB);
-	int id = 0;
-	while(!check(Kind::TAB)) {
+	for(;;) {
+		if (!check(Kind::TAB))  break;
+		consume(Kind::TAB);
 		auto inst = instruction();
-		Log(fmt::format("\t\t{} {}", inst->node_name, id))
-		labels.push_back(inst);
-		Log(peek()->short_to_string())
+		DebugInfo(fmt::format("\t{}", inst->to_string()))
+		instructions.push_back(inst);
 		consume(Kind::EOL);
 	}
-	Log("Ending Label")
-	return new LabelNode(ident, name, labels);
+
+	DebugInfo(peek()->name)
+
+	return new LabelNode(label, name, instructions);
 }
 
 auto Parse::instruction() -> Node* {
@@ -171,10 +170,10 @@ auto Parse::v_register() -> Node* {
 
 auto Parse::d_register() -> Node* {
 	auto reg = consume(Kind::DATA);
+
 	auto str = reg->name;
 	auto id_str = str.substr(1);
 	size id = std::stoi(id_str);
-
 
 	return new DataRegisterNode(reg, id);
 }
@@ -194,31 +193,39 @@ auto Parse::type() -> Node* {
 }
 
 auto Parse::data() -> Node* {
-	auto data = d_register();
-	Log("processing data node")
-	consume(Kind::SPACE);
-	consume(Kind::STATIC);
+	if (check(3, Kind::OPEN_BRACE)) return data_types();
+	if (check(3, Kind::STATIC)) return data_static();
+
+	fmt::println("Data node must either be a static node ex (d10 STATIC literal) or a type node ex(d10 {{i32 i32 i8}})");
+
+	parse_error(fmt::format("Illegal token found for data node definition {}", peek()->to_string()));
+	return nullptr;
+}
+
+auto Parse::data_types() -> Node* {
+	auto reg = d_register();
 	consume(Kind::SPACE);
 
-	if (peek()->is_literal() || check(Kind::DOUBLE_QUOTE)) {
-		auto lit = literal();
-		return new DataStaticNode(data, nullptr, {lit}, nullptr);
-	} else if (check(Kind::OPEN_BRACE)) {
-		std::vector<Node*> types;
-		auto open = consume(Kind::OPEN_BRACE);
-		for(;;) {
+	auto open = consume(Kind::OPEN_BRACE);
+	std::vector<Node*> nodes;
+	for(;;) {
+		consume(Kind::SPACE);
+		if (check(Kind::CLOSE_BRACE)) break;
 
-			consume(TokenKind::SPACE);
-			if (check(Kind::CLOSE_BRACE)) break;
-			types.push_back(type());
-		}
-		auto close = consume(Kind::CLOSE_BRACE);
-		return new DataStaticNode(data, open, types, close);
-	} else {
-		parse_error(fmt::format("Illegal token for DATA STRUCT expected a literal or a set of values \n\t {}", peek()->to_string()));
+		auto type = this->type();
+		nodes.push_back(type);
 	}
+	auto end = consume(Kind::CLOSE_BRACE);
+	return new DataTypeNode(reg, open, nodes, end);
+}
 
-	parse_error(fmt::format("Illegal token only STATIC is supported got {}", peek()->to_string()));
+auto Parse::data_static() -> Node*{
+	auto reg = d_register();
+	consume(Kind::SPACE);
+	auto ident = consume(Kind::STATIC);
+	consume(Kind::SPACE);
+	auto lit = literal();
+	return new DataStaticNode(reg, ident, lit);
 }
 
 /**
@@ -324,9 +331,13 @@ auto Parse::_not() -> Node* {
 }
 
 auto Parse::_return() -> Node* {
+	DebugInfo("Start parse of return node")
 	auto ident = consume(Kind::RETURN);
+
 	consume(Kind::SPACE);
 	auto target = reg();
+
+	DebugInfo("End parse of return node")
 	return new ReturnNode(ident, target);
 }
 
@@ -366,12 +377,10 @@ auto Parse::call() -> Node* {
 	auto func = literal();
 
 	std::vector<Node*> params;
-	params.push_back(reg());
-
 
 	for(;;) {
 		if (check(Kind::EOL)) break;
-		consume(Kind::COMMA);
+		consume(Kind::SPACE);
 		params.push_back(reg());
 	}
 

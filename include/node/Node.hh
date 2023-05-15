@@ -422,11 +422,13 @@ class WriteNode : public Node {
 
 class DataStaticNode : public Node {
 	public:
-		Node* data_register;
-		Node* literal;
+		Node*  data_register;
+		Token* ident;
+		Node*  literal;
 
-		DataStaticNode(Node* d_reg, Node* literal) : Node(Kind::DATA_STATIC_NODE){
+		DataStaticNode(Node* d_reg, Token* ident, Node* literal) : Node(Kind::DATA_STATIC_NODE){
 			this->data_register = d_reg;
+			this->ident         = ident;
 			this->literal       = literal;
 		}
 
@@ -437,6 +439,7 @@ class DataStaticNode : public Node {
 };
 
 class DataTypeNode : public Node {
+	public:
 		Node* data_register;
 		Token* start;
 		std::vector<Node*> types;
@@ -457,7 +460,7 @@ class DataTypeNode : public Node {
 				str.append(it->to_string());
 				str.append(" ");
 			}
-			return fmt::format("{} {{}}", data_register->to_string(), str);
+			return fmt::format("{} {{ {} }}", data_register->to_string(), str);
 		}
 };
 
@@ -488,7 +491,7 @@ class TypeNode : public Node {
 
 
 		auto to_string() -> std::string override {
-			return ident->to_string();
+			return ident->name;
 		}
 };
 }

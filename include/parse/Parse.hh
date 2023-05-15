@@ -42,6 +42,9 @@ class Parse {
 		auto label() -> Node*;
 
 		auto data() -> Node*;
+		auto data_types() -> Node*;
+		auto data_static() -> Node*;
+
 		auto bi_node() -> Node*;
 		auto compare() -> Node*;
 		auto jump() -> Node*;
