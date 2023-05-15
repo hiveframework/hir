@@ -459,8 +459,7 @@ class DataTypeNode : public Node {
 			}
 			return fmt::format("{} {{}}", data_register->to_string(), str);
 		}
-
-}
+};
 
 class DataStructNode : public Node {
 	public:
