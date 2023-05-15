@@ -46,6 +46,7 @@ class WriteNode;
 class DebugNode;
 class DataStaticNode;
 class DataStructNode;
+class DataTypeNode;
 class TypeNode;
 
 class ProgNode {
@@ -66,6 +67,8 @@ class Node {
 	public:
 		Kind kind;
 		std::string node_name;
+
+		virtual auto to_string() -> std::string = 0;
 };
 
 class VirtualRegisterNode : public Node {
@@ -77,6 +80,10 @@ class VirtualRegisterNode : public Node {
 			this->ident = ident;
 			this->id    = id;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("r{}", id);
+		}
 };
 
 class DataRegisterNode : public Node {
@@ -87,6 +94,10 @@ class DataRegisterNode : public Node {
 		DataRegisterNode(Token* ident, size id) : Node(Kind::VIRTUAL_REGISTER_NODE) {
 			this->ident = ident;
 			this->id    = id;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("d{}", id);
 		}
 };
 
@@ -101,6 +112,16 @@ class DirectiveNode : public Node {
 			this->name   = name;
 			this->tokens = tokens;
 		}
+
+		auto to_string() -> std::string override {
+			std::string str;
+
+			For(tokens) {
+				str.append(it->name);
+			}
+
+			return fmt::format("#{}", str);
+		}
 };
 
 class IdentLiteralNode : public Node {
@@ -109,6 +130,10 @@ class IdentLiteralNode : public Node {
 
 		IdentLiteralNode(Token* ident) : Node(Kind::IDENT_LITERAL_NODE) {
 			this->ident = ident;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{}", ident->name);
 		}
 };
 
@@ -121,6 +146,10 @@ class StringLiteralNode : public Node {
 		StringLiteralNode(Token* start, Token* ident, Token* end) : Node(Kind::STRING_LITERAL_NODE) {
 			this->ident = ident;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("\"{}\"", ident->name);
+		}
 };
 
 class HexLiteralNode : public Node {
@@ -130,14 +159,22 @@ class HexLiteralNode : public Node {
 		HexLiteralNode(Token* ident) : Node(Kind::HEX_LITERAL_NODE) {
 			this->ident = ident;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{}", ident->name);
+		}
 };
 
 class DigitLiteralNode : public Node {
 	public:
 		Token* ident;
 
-		DigitLiteralNode(Token* ident) : Node(Kind::HEX_LITERAL_NODE) {
+		DigitLiteralNode(Token* ident) : Node(Kind::DIGIT_LITERAL_NODE) {
 			this->ident = ident;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{}", ident->name);
 		}
 };
 
@@ -145,8 +182,12 @@ class OctalLiteralNode : public Node {
 	public:
 		Token* ident;
 
-		OctalLiteralNode(Token* ident) : Node(Kind::HEX_LITERAL_NODE) {
+		OctalLiteralNode(Token* ident) : Node(Kind::OCTAL_LITERAL_NODE) {
 			this->ident = ident;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{}", ident->name);
 		}
 };
 
@@ -154,8 +195,12 @@ class BinaryLiteralNode : public Node {
 	public:
 		Token* ident;
 
-		BinaryLiteralNode(Token* ident) : Node(Kind::HEX_LITERAL_NODE) {
+		BinaryLiteralNode(Token* ident) : Node(Kind::BINARY_LITERAL_NODE) {
 			this->ident = ident;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{}", ident->name);
 		}
 };
 
@@ -170,6 +215,10 @@ class LabelNode : public Node {
 			this->name = name;
 			this->instructions = instructions;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("LABEL {}:", ident->name);
+		}
 };
 
 class FuncNode : public Node {
@@ -183,6 +232,11 @@ class FuncNode : public Node {
 			this->name      = name;
 			this->registers = registers;
 		}
+
+		auto to_string() -> std::string override {
+			return "FUNCTION NOT IMPLEMENTED";
+		}
+
 };
 
 class BiNode : public Node {
@@ -198,6 +252,10 @@ class BiNode : public Node {
 			this->in_2  = in_2;
 			this->out   = out;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {}, {} -> {}", ident->name, in_1->to_string() , in_2->to_string(), out->to_string());
+		}
 };
 
 class NotNode : public Node {
@@ -210,6 +268,10 @@ class NotNode : public Node {
 			this->ident = ident;
 			this->in    = in;
 			this->out   = out ;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, in->to_string(), out->to_string());
 		}
 };
 
@@ -225,6 +287,10 @@ class CompareNode : public Node {
 			this->in_1  = in_1;
 			this->in_2  = in_2;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, in_2->to_string(), in_2->to_string());
+		}
 };
 
 //Note(anita): A catch all for all the jump node types
@@ -239,6 +305,10 @@ class JumpNode : public Node {
 			this->in_1  = in_1;
 			this->in_2  = in_2;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, in_2->to_string(), in_2->to_string());
+		}
 };
 
 class ReturnNode : public Node {
@@ -249,6 +319,10 @@ class ReturnNode : public Node {
 		ReturnNode(Token* ident, Node* reg) : Node(Kind::RETURN_NODE) {
 			this->ident = ident;
 			this->reg   = reg;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {}", ident->name, reg->to_string());
 		}
 };
 
@@ -263,6 +337,10 @@ class DerefNode : public Node {
 			this->reg   = reg;
 			this->out   = out;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, reg->to_string(), out->to_string());
+		}
 };
 
 class PointerToNode : public Node {
@@ -275,6 +353,10 @@ class PointerToNode : public Node {
 			this->ident = ident;
 			this->reg   = reg;
 			this->out   = out;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, reg->to_string(), out->to_string());
 		}
 };
 
@@ -291,6 +373,16 @@ class CallNode : public Node {
 			this->function = function;
 			this->params   = params;
 		}
+
+		auto to_string() -> std::string override {
+			std::string str;
+
+			For(params) {
+				str.append(it->to_string());
+			}
+
+			return fmt::format("{} {}.{}({})", ident->name, lib->to_string(), function->to_string(), str);
+		}
 };
 
 class StoreNode : public Node {
@@ -303,6 +395,10 @@ class StoreNode : public Node {
 			this->ident = ident;
 			this->value = value;
 			this->reg   = reg;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, reg->to_string(), reg->to_string());
 		}
 };
 
@@ -318,22 +414,53 @@ class WriteNode : public Node {
 			this->value = value;
 			this->reg   = reg;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", ident->name, reg->to_string(), reg->to_string());
+		}
 };
 
 class DataStaticNode : public Node {
 	public:
 		Node* data_register;
+		Node* literal;
+
+		DataStaticNode(Node* d_reg, Node* literal) : Node(Kind::DATA_STATIC_NODE){
+			this->data_register = d_reg;
+			this->literal       = literal;
+		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {}", data_register->to_string(), literal->to_string());
+		}
+
+};
+
+class DataTypeNode : public Node {
+		Node* data_register;
 		Token* start;
 		std::vector<Node*> types;
 		Token* end;
 
-		DataStaticNode(Node* d_reg, Token* start, std::vector<Node*> types, Token* end) : Node(Kind::DATA_STATIC_NODE){
+		DataTypeNode(Node* d_reg, Token* start, std::vector<Node*> types, Token* end) : Node(Kind::DATA_TYPE_NODE) {
 			this->data_register = d_reg;
 			this->start         = start;
 			this->types         = types;
 			this->end           = end;
 		}
-};
+
+		auto to_string() -> std::string override {
+			std::string str;
+			str.append(" ");
+
+			For(types) {
+				str.append(it->to_string());
+				str.append(" ");
+			}
+			return fmt::format("{} {{}}", data_register->to_string(), str);
+		}
+
+}
 
 class DataStructNode : public Node {
 	public:
@@ -346,6 +473,10 @@ class DataStructNode : public Node {
 			this->ident         = ident;
 			this->literal       = literal;
 		}
+
+		auto to_string() -> std::string override {
+			return fmt::format("{} {} -> {}", data_register->to_string(), ident->to_string(), literal->to_string());
+		}
 };
 
 class TypeNode : public Node {
@@ -354,6 +485,11 @@ class TypeNode : public Node {
 
 		TypeNode(Token* ident, Kind kind) : Node(kind) {
 			this->ident = ident;
+		}
+
+
+		auto to_string() -> std::string override {
+			return ident->to_string();
 		}
 };
 }
